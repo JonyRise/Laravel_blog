@@ -3,6 +3,7 @@
 //use App\Http\Controllers\RestTestController;
 
 use App\Http\Controllers\Blog\PostController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,7 +23,7 @@ Route::get('/', function () {
 
 //  Route::get('/test', [RestTestController::class, 'index'])->name('id');
 //Route::get('/test', 'App\Http\Controllers\RestTestController@index')->name('id');
-Route::resource('rest', 'App\Http\Controllers\RestTestController');
+//Route::resource('rest', 'App\Http\Controllers\RestTestController');
 
 // Route::get('/post/all',[PostController::class, 'index']);
 Route::group(
@@ -32,5 +33,16 @@ Route::group(
         Route::resource('posts', 'PostController')->names('blog.posts');
     }
 );
+// Auth::routes();
+$groupData = [
+    'namespace' => 'App\Http\Controllers\Blog\Admin',
+    'prefix' => 'admin/blog'
+];
 
+Route::group($groupData, function() {
+    $method = ['index', 'edit', 'store', 'update', 'create'];
+    Route::resource('categories', 'CategoryController')
+    ->only($method)
+    ->names('admin.blog.categories');
+});
 

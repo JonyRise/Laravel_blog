@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers\Blog;
+namespace App\Http\Controllers\Blog\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BlogCategory;
 use App\Models\BlogPost;
 use Illuminate\Http\Request;
 
-class PostController extends BaseController
+class CategoryController extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -15,10 +16,11 @@ class PostController extends BaseController
      */
     public function index()
     {
-        $items = BlogPost::all();
-        // $items = BlogPost::withTrashed()->get();
-       // dd($items->first());
-        return view('blog.posts.index', compact('items'));
+        $paginator = BlogCategory::paginate(22);
+        return view('blog.admin.category.index', compact('paginator'));
+
+
+        //
     }
 
     /**
@@ -61,6 +63,10 @@ class PostController extends BaseController
      */
     public function edit($id)
     {
+        $item = BlogCategory::findOrFail($id);
+        $category = BlogCategory::all();
+       return view('blog.admin.category.edit', compact('item','category'));
+        // dd($item, $category);
         //
     }
 
@@ -72,8 +78,28 @@ class PostController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
-    {
-        //
+    {return back()
+        ->withErrors(['msg'=>"Запись id={$id} не найдена!"])
+        ->withInput();
+        $item = BlogCategory::find($id);
+
+        if(empty($item)) {
+            return back()
+            ->withErrors(['msg'=>"Запись id={$id} не найдена!"])
+            ->withInput();
+        }
+        $data = $request->all();
+        $item->fill($data);
+        $result = $item->update($data);
+        if ($result) {
+            return redirect()
+            ->route('admin.blog.categories.edit',$item->id)
+            ->with(['success' => 'Успешно создано!']);
+        } else {
+            return back()
+            ->withErrors(['msg' => 'Ошибка при сохранении'])
+            ->withInput();
+        }
     }
 
     /**
